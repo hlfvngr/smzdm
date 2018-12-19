@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cskaoyan.smzdm.mapper.CommentMapper" >
+    <resultMap id="BaseResultMap" type="com.cskaoyan.smzdm.bean.vo.CommentVO">
+
+       <association property="comment" javaType="com.cskaoyan.smzdm.bean.Comment">
+           <id column="id" property="id"/>
+           <result column="content" property="content"/>
+           <result column="create_date" property="createdDate"/>
+       </association>
+
+        <association property="user" javaType="com.cskaoyan.smzdm.bean.User">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="password" property="password"/>
+            <result column="head_url" property="headUrl"/>
+        </association>
+
+    </resultMap>
+
+    <sql id="baseSql">
+         id, content, create_date, user_id, news_id
+    </sql>
+
+    <select id="selectCommentByNewsId" resultMap="BaseResultMap">
+        select  c.id, c.content, c.create_date, c.news_id, c.user_id,
+         u.id, u.`name`, u.password, u.head_url
+        from comment c left join users u on c.user_id = u.id
+        where c.news_id = #{newsId} order by c.create_date desc;
+    </select>
+
+    <insert id="insertComment">
+        insert into comment (<include refid="baseSql"/>)
+        values ( replace(uuid(),'-',''),#{comment.content},#{comment.createdDate},#{user.id},#{comment.newsId});
+    </insert>
+</mapper>

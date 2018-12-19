@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cskaoyan.smzdm.mapper.NewsMapper" >
+        <resultMap id="BaseResultMap" type="com.cskaoyan.smzdm.bean.vo.NewsVO" >
+                <!--<result column="like_count" property="like"/>注意:和下面的likeCount不能一起用-->
+                <association property="user" javaType="com.cskaoyan.smzdm.bean.User">
+                        <id column="id" property="id"/>
+                        <result column="name" property="name"/>
+                        <result column="head_url" property="headUrl"/>
+                </association>
+                <association property="news" javaType="com.cskaoyan.smzdm.bean.News">
+                        <id column="nId" property="id"/>
+                        <result column="title" property="title"/>
+                        <result column="link" property="link"/>
+                        <result column="like_count" property="likeCount"/>
+                        <result column="image" property="image" />
+                        <result column="create_date" property="createdDate"/>
+                        <result column="comment_count" property="commentCount"/>
+                </association>
+        </resultMap>
+
+        <sql id="baseSql">
+        id, title, link, like_count, image, create_date, comment_count, user_id
+    </sql>
+
+        <sql id="join">
+         u.id, u.`name`, u.head_url,
+         n.id as nId, n.title, n.link, n.like_count, n.image, n.create_date, n.comment_count,n.user_id
+         from news n left join users u on n.user_id = u.id
+    </sql>
+
+    <insert id="insert">
+        insert into news ( id, title, link, like_count, image, create_date, comment_count, user_id )
+         values (replace(uuid(),'-',''),#{news.title},#{news.link},#{news.likeCount},
+         #{news.image},#{news.createdDate},#{news.commentCount},#{user.id});
+    </insert>
+
+        <select id="selectAllNewsVO" resultMap="BaseResultMap">
+         select  u.id, u.`name`, u.head_url,
+         n.id as nId, n.title, n.link, n.like_count, n.image, n.create_date, n.comment_count,n.user_id
+         from news n left join users u on n.user_id = u.id order by n.create_date desc;
+    </select>
+
+        <select id="selectNewsById" resultMap="BaseResultMap">
+            select <include refid="join"/> where n.id = #{newsId};
+        </select>
+
+    <select id="selectCommentCountByNewsId" resultType="_int">
+        select comment_count from news where id = #{newId};
+    </select>
+
+    <update id="updateCommentCountByNewsId">
+         update news set comment_count = #{commentCount} where id = #{newsId};
+    </update>
+    <!--like-->
+    <select id="isExist" resultType="_int">
+        select count(*) from `like` where news_id = #{newsId} and support_id = #{userId};
+    </select>
+
+    <insert id="addSupport">
+        insert into `like` (id, news_id, support_id) values(replace(uuid(),'-',''),#{newsId},#{userId});
+    </insert>
+
+    <delete id="deleteSupport">
+        delete from `like` where news_id = #{newsId} and support_id = #{userId};
+    </delete>
+   <!--news-->
+    <select id="selectLikeCountByNewsId" resultType="_int">
+        select like_count from news where id = #{newsId};
+    </select>
+
+    <update id="updateLikeCountByNewsId">
+        update news set like_count = #{likeCount} where id = #{newsId};
+    </update>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cskaoyan.smzdm.mapper.UserMapper" >
+    <resultMap id="BaseResultMap" type="com.cskaoyan.smzdm.bean.User" >
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="password" property="password"/>
+        <result column="head_url" property="headUrl"/>
+    </resultMap>
+
+    <sql id="baseSql">
+        id, `name`, password, head_url
+    </sql>
+
+    <insert id="insert">
+        insert into users (id, `name`, password, head_url) values(replace(uuid(),'-',''),#{name},#{password},#{headUrl});
+    </insert>
+
+    <select id="selectUserByNameAndPwd" resultMap="BaseResultMap">
+        select <include refid="baseSql"/> from users where `name` = #{name} and password = #{password};
+    </select>
+
+    <select id="selectUserByName" resultMap="BaseResultMap">
+        select <include refid="baseSql"/> from users where `name` = #{name};
+    </select>
+
+    <select id="selectUserById" resultMap="BaseResultMap">
+        select <include refid="baseSql"/> from users where id = #{userId};
+    </select>
+</mapper>
