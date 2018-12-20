@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -24,9 +26,12 @@ public class FromController {
     @RequestMapping("/")
     public String formName(HttpSession session,Model model){
         List<NewsVO> vos = newsService.findAllNews();
+        Jedis jedis = new JedisPool().getResource();
         if(vos != null){
             for (NewsVO vo : vos) {
-                vo.setLike(vo.getNews().getLikeCount());
+                int scard = jedis.scard(vo.getNews().getId() + "_like").intValue();
+                vo.getNews().setLikeCount(scard);
+                vo.setLike(scard);
             }
         }
         session.getServletContext().setAttribute("vos",vos);
@@ -39,9 +44,12 @@ public class FromController {
     public String formName(@PathVariable String formName, HttpSession session, Model model){
 
         List<NewsVO> vos = newsService.findAllNews();
+        Jedis jedis = new JedisPool().getResource();
         if(vos != null){
             for (NewsVO vo : vos) {
-                vo.setLike(vo.getNews().getLikeCount());
+                int scard = jedis.scard(vo.getNews().getId() + "_like").intValue();
+                vo.getNews().setLikeCount(scard);
+                vo.setLike(scard);
             }
         }
         session.getServletContext().setAttribute("vos",vos);

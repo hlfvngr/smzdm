@@ -3,6 +3,7 @@ package com.cskaoyan.smzdm.controller;
 import com.cskaoyan.smzdm.bean.Comment;
 import com.cskaoyan.smzdm.bean.User;
 import com.cskaoyan.smzdm.bean.vo.CommentVO;
+import com.cskaoyan.smzdm.bean.vo.NewsVO;
 import com.cskaoyan.smzdm.service.CommentService;
 import com.cskaoyan.smzdm.service.NewsService;
 import com.cskaoyan.smzdm.service.UserService;
@@ -13,12 +14,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import javax.servlet.http.HttpSession;
 import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Controller
 public class AjaxController {
@@ -102,14 +106,14 @@ public class AjaxController {
     }
 
     @RequestMapping("/logout")
-    public String logout(HttpSession session, Model model){
+    public String logout(HttpSession session){
         if(session != null){
             session.invalidate();
-            model.addAttribute("pop",0);
+            //model.addAttribute("pop",0);
         }else {
-            model.addAttribute("pop",1);
+            //model.addAttribute("pop",1);
         }
-        return "home";
+        return "redirect:/home";
     }
 
     @RequestMapping("/addComment")
@@ -129,6 +133,42 @@ public class AjaxController {
     }
 
     @RequestMapping("/like")
+    @ResponseBody//怎么将数据与news的like_count同步
+    public Map<String,Object> like(String newsId,HttpSession session,Model model){
+        NewsVO newsById = newsService.findNewsById(newsId);
+        Map<String,Object> result = new HashMap<>();
+        User user = (User) session.getAttribute("user");
+        Jedis jedis = new JedisPool().getResource();
+        Long srem = jedis.srem(newsId + "_dislike", user.getId());
+        Long sadd = jedis.sadd(newsId + "_like", user.getId());
+        Long scard = jedis.scard(newsId + "_like");
+        //{"msg":"4","code":0}
+         result.put("msg",scard);
+         result.put("code",0);
+
+        return result;
+    }
+
+    @RequestMapping("/dislike")
+    @ResponseBody//怎么将数据与news的like_count同步
+    public Map<String,Object> dislike(String newsId,HttpSession session,Model model){
+        Map<String,Object> result = new HashMap<>();
+        User user = (User) session.getAttribute("user");
+        Jedis jedis = new JedisPool().getResource();
+        Long srem = jedis.srem(newsId + "_like", user.getId());
+        if(srem != 0){
+            Long sadd = jedis.sadd(newsId + "_dislike", user.getId());
+        }
+        Long scard = jedis.scard(newsId + "_like");
+        //{"msg":"4","code":0}
+        result.put("msg",scard);
+        result.put("code",0);
+
+        return result;
+    }
+
+
+    /*@RequestMapping("/like")
     @ResponseBody
     public Map<String,Object> like(String newsId,HttpSession session,Model model){
         Map<String,Object> result = new HashMap<>();
@@ -167,7 +207,7 @@ public class AjaxController {
             result.put("code",1);
         }
         return result;
-    }
+    }*/
 
     private String encryptByHash(String content,String algorithm) {
         try {

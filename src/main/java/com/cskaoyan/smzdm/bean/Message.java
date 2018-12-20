@@ -4,7 +4,6 @@ public class Message {
     private String id;
     private String toName;
     private String context;
-    //private User user;
 
     public String getId() {
         return id;
@@ -30,11 +29,4 @@ public class Message {
         this.context = context;
     }
 
-   /* public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }*/
 }

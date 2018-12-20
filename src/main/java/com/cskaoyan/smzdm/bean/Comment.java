@@ -7,7 +7,6 @@ public class Comment {
     private String content;
     private Date createdDate;
     private String newsId;
-    //private User user;
 
     public String getId() {
         return id;
@@ -40,11 +39,5 @@ public class Comment {
     public void setNewsId(String newsId) {
         this.newsId = newsId;
     }
-    /* public User getUser() {
-        return user;
-    }
 
-    public void setUser(User user) {
-        this.user = user;
-    }*/
 }

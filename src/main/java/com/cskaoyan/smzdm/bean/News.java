@@ -1,14 +1,24 @@
 package com.cskaoyan.smzdm.bean;
 
+import javax.validation.constraints.Pattern;
 import java.util.Date;
 
 public class News {
     private String id;
+
+    @Pattern(regexp = "(\\w|[\\u2E80-\\u9FFF]){3,16}",message = "标题不合法")
     private String title;
+
+    @Pattern(regexp = "https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?",message = "链接不合法!")
     private String link;
+
     private Integer likeCount;
+
+    @Pattern(regexp = "https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?",message = "图片路径不合法!")
     private String image;
+
     private Date createdDate;
+
     private Integer commentCount;
 
     public String getId() {

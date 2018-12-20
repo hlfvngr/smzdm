@@ -10,11 +10,13 @@ import com.cskaoyan.smzdm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,8 +62,13 @@ public class UserController {
 
     @RequestMapping("/addNews")
     @ResponseBody
-    public Map<String,Object> addNews(News news,HttpSession session){
+    public Map<String,Object> addNews(@Valid News news, HttpSession session, BindingResult bindingResult){
         Map<String,Object> result = new HashMap<>();
+        if(bindingResult.hasErrors()){
+            result.put("code",1);
+            return result;
+        }
+
         User user = (User) session.getAttribute("user");
         news.setCreatedDate(new Date());
         news.setLikeCount(0);
