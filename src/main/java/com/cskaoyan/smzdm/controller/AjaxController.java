@@ -138,12 +138,16 @@ public class AjaxController {
         NewsVO newsById = newsService.findNewsById(newsId);
         Map<String,Object> result = new HashMap<>();
         User user = (User) session.getAttribute("user");
-        Jedis jedis = new JedisPool().getResource();
-        Long srem = jedis.srem(newsId + "_dislike", user.getId());
-        Long sadd = jedis.sadd(newsId + "_like", user.getId());
-        Long scard = jedis.scard(newsId + "_like");
-        //{"msg":"4","code":0}
-         result.put("msg",scard);
+
+        if(user != null){
+            Jedis jedis = new JedisPool().getResource();
+            Long srem = jedis.srem(newsId + "_dislike", user.getId());
+            Long sadd = jedis.sadd(newsId + "_like", user.getId());
+            Long scard = jedis.scard(newsId + "_like");
+            //{"msg":"4","code":0}
+            result.put("msg",scard);
+        }
+
          result.put("code",0);
 
         return result;
@@ -154,14 +158,18 @@ public class AjaxController {
     public Map<String,Object> dislike(String newsId,HttpSession session,Model model){
         Map<String,Object> result = new HashMap<>();
         User user = (User) session.getAttribute("user");
-        Jedis jedis = new JedisPool().getResource();
-        Long srem = jedis.srem(newsId + "_like", user.getId());
-        if(srem != 0){
-            Long sadd = jedis.sadd(newsId + "_dislike", user.getId());
+
+        if(user != null){
+            Jedis jedis = new JedisPool().getResource();
+            Long srem = jedis.srem(newsId + "_like", user.getId());
+            if(srem != 0){
+                Long sadd = jedis.sadd(newsId + "_dislike", user.getId());
+            }
+            Long scard = jedis.scard(newsId + "_like");
+            //{"msg":"4","code":0}
+            result.put("msg",scard);
         }
-        Long scard = jedis.scard(newsId + "_like");
-        //{"msg":"4","code":0}
-        result.put("msg",scard);
+
         result.put("code",0);
 
         return result;

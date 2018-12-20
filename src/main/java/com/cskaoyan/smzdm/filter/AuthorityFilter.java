@@ -26,9 +26,7 @@ public class AuthorityFilter implements Filter {
 
         if(requestURI.matches(".*/user/.*")
                 || requestURI.endsWith("/logout")
-                || requestURI.endsWith("/addComment")
-                || requestURI.endsWith("/like")
-                || requestURI.endsWith("/dislike")){
+                || requestURI.endsWith("/addComment")){
             HttpSession session = req.getSession(false);
             if(session != null){
                 User user = (User) session.getAttribute("user");
