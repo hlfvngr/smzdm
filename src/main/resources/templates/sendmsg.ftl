@@ -24,7 +24,7 @@
 
                                 <div class="add-question-section-title">发给：</div>
                                 <div class="zg-form-text-input add-question-title-form" style="position: relative;">
-                                    <textarea  id="msg_to" rows="1" class="zg-editor-input zu-seamless-input-origin-element" title="在这里输入问题" id="zh-question-suggest-title-content" aria-label="写下你的问题" placeholder="姓名" role="combobox" aria-autocomplete="list" autocomplete="off" style="height: 22px;"></textarea>
+                                    <textarea  id="msg_to" rows="1" class="zg-editor-input zu-seamless-input-origin-element"  placeholder="姓名" role="combobox" aria-autocomplete="list" autocomplete="off" style="height: 22px"></textarea>
                                 </div>
                             </div>
                             <div class="zg-section-big">
@@ -35,7 +35,8 @@
                                             <div class="zm-editable-editor-field-wrap">
                                                 <div id="mock:k" class="zm-editable-editor-field-element editable" g_editable="true" role="textbox" contenteditable="true" style="font-style: italic;">
                                                     <p>
-                                                        <span id="msg_content" style="font-style: normal;color: #999;" aria-placeholder="私信内容x"></span></p>
+                                                        <textarea  id="msg_content" rows="8" class="zg-editor-input zu-seamless-input-origin-element"  aria-autocomplete="list" autocomplete="off" style="height: 22px"></textarea>
+                                                       <#-- <span id="msg_content" style="font-style: normal;color: #999;" aria-placeholder="私信内容x"></span>--></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -60,8 +61,8 @@
         var elementById = document.getElementById("msg_to");
         var to=elementById.value;
         var elementById2 = document.getElementById("msg_content");
-        var content=elementById2.innerText;
-        //alert(content)
+        var content=elementById2.value;
+        // alert(content)
 
         var  errtag =document.getElementById("zh-question-form-tag-err");
 
@@ -69,7 +70,7 @@
         $.ajax(
             {
                 type:"POST",
-                url:"/user/msg/addMessage",
+                url:"msg/addMessage",
                 data: 'toName='+to+'&&content='+content ,
                 success:function(data){
                     //alert(data)

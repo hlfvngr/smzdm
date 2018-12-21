@@ -1,12 +1,12 @@
 package com.cskaoyan.smzdm.controller;
 
-import com.cskaoyan.smzdm.bean.Comment;
-import com.cskaoyan.smzdm.bean.User;
+import com.cskaoyan.smzdm.bean.*;
 import com.cskaoyan.smzdm.bean.vo.CommentVO;
 import com.cskaoyan.smzdm.bean.vo.NewsVO;
 import com.cskaoyan.smzdm.service.CommentService;
 import com.cskaoyan.smzdm.service.NewsService;
 import com.cskaoyan.smzdm.service.UserService;
+import com.cskaoyan.smzdm.utils.event.EventProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -22,7 +22,6 @@ import java.security.MessageDigest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Controller
 public class AjaxController {
@@ -135,7 +134,6 @@ public class AjaxController {
     @RequestMapping("/like")
     @ResponseBody//怎么将数据与news的like_count同步
     public Map<String,Object> like(String newsId,HttpSession session,Model model){
-        NewsVO newsById = newsService.findNewsById(newsId);
         Map<String,Object> result = new HashMap<>();
         User user = (User) session.getAttribute("user");
 
@@ -144,6 +142,16 @@ public class AjaxController {
             Long srem = jedis.srem(newsId + "_dislike", user.getId());
             Long sadd = jedis.sadd(newsId + "_like", user.getId());
             Long scard = jedis.scard(newsId + "_like");
+            //事件
+            Event event = new Event();
+            event.setActionId(user.getId());
+            NewsVO newsById = newsService.findNewsById(newsId);
+            event.setEffectId(newsById.getUser().getId());
+            event.setItemType(ItemType.NEWS);
+            event.setItemId(newsId);
+            event.setEventType(EventType.LIKE);
+            EventProducer.fireEvent(event);
+
             //{"msg":"4","code":0}
             result.put("msg",scard);
         }

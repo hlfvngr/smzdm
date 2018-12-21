@@ -42,4 +42,13 @@ public class NewsController {
         return "detail";
     }
 
+    @RequestMapping("/like")
+    public String like(){
+        return "forward:/like";
+    }
+
+    @RequestMapping("/dislike")
+    public String dislike(){
+        return "forward:/dislike";
+    }
 }

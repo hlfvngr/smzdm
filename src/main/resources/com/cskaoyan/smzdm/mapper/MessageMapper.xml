@@ -6,7 +6,11 @@
       <association property="message" javaType="com.cskaoyan.smzdm.bean.Message">
           <id column="id" property="id"/>
           <result column="to_name" property="toName"/>
-          <result column="context" property="context"/>
+          <result column="from_id" property="fromId"/>
+          <result column="content" property="content"/>
+          <result column="unread" property="unread"/>
+          <result column="create_date" property="createdDate"/>
+          <result column="conversation_id" property="conversationId"/>
       </association>
 
       <association property="user" javaType="com.cskaoyan.smzdm.bean.User">
@@ -19,23 +23,36 @@
     </resultMap>
 
     <sql id="baseSql">
-        id, to_name, context, user_id
+        id, to_name, from_id, content, unread, create_date, conversation_id
     </sql>
 
     <insert id="insertMessage">
-        insert into message (<include refid="baseSql"/>) values(replace(uuid(),'-',''),#{message.toName},#{message.context},#{user.id});
+        insert into message (<include refid="baseSql"/>)
+        values(replace(uuid(),'-',''),#{message.toName},#{message.fromId},
+        #{message.content},#{message.unread},#{message.createdDate},#{message.conversationId});
     </insert>
 
     <sql id="join">
-        m.id, m.to_name, m.context, m.user_id,
+        m.id, m.to_name, m.from_id, m.content, m.unread, m.create_date, m.conversation_id,
         u.id, u.`name`, u.password, u.head_url
-        from message m left join users u on m.user_id = u.id;
+        from message m left join users u on m.user_id = u.id
     </sql>
 
     <select id="selectAllMessageVO" resultMap="BaseResultMap">
-        select m.id, m.to_name, m.context, m.user_id,
+        select m.id, m.to_name, m.from_id, m.content, m.unread, m.create_date, m.conversation_id,
         u.id, u.`name`, u.password, u.head_url
-        from message m left join users u on m.user_id = u.id;
+        from message m left join users u on m.from_id = u.id
+        where u.id = #{userId};
     </select>
 
+    <select id="selectMessageVOByCid" resultMap="BaseResultMap">
+        select m.id, m.to_name, m.from_id, m.content, m.unread, m.create_date, m.conversation_id,
+        u.id, u.`name`, u.password, u.head_url
+        from message m left join users u on m.from_id = u.id
+        where u.id = #{userId} and m.conversation_id = #{conversationId};
+    </select>
+
+    <update id="updateMessageByCid">
+        update message set unread = 1 where from_id = #{userId} and conversation_id = #{conversationId};
+    </update>
 </mapper>

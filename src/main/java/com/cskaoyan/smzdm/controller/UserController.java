@@ -44,11 +44,27 @@ public class UserController {
         return "sendmsg";
     }
 
-    @RequestMapping("/msg/addMessage")//怎么发给别人
+    @RequestMapping("/msg/addMessage")
     @ResponseBody
     public Map<String,Object> addMessage(Message message, HttpSession session){
         Map<String,Object> result = new HashMap<>();
         User user = (User) session.getAttribute("user");
+        message.setCreatedDate(new Date());
+        message.setUnread(0);
+
+        //进行比较字符串比较，然后进行拼接，作为conversationId
+        //这里选择uuid进行拼接
+        String toName = message.getToName();
+        User userByName = userService.findUserByName(toName);
+        if(userByName == null){
+            return null;
+        }
+        String fromId = user.getId();
+        message.setFromId(fromId);
+
+        String conversationId = createConversationId(fromId,userByName.getId());
+
+        message.setConversationId(conversationId);
         MessageVO messageVO =new MessageVO(message,user);
         //参数校验
         boolean b = userService.sendMessage(messageVO);
@@ -58,6 +74,10 @@ public class UserController {
             result.put("code",1);
         }
         return result;
+    }
+
+    private String createConversationId(String fromId, String toId) {
+        return fromId.compareTo(toId) >= 0 ? fromId + toId : toId + fromId;
     }
 
     @RequestMapping("/addNews")
